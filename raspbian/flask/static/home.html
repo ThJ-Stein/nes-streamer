@@ -1,0 +1,49 @@
+	<!DOCTYPE html>
+<head>
+	<title>Settings</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script>
+
+		function start() {
+			$.post("/start");
+		}
+
+		function stop() {
+			$.post("/stop");
+		}
+
+		function postSettings() {
+
+			settings = {};
+			settings.bitrate = $("#bitrate").val();
+			settings.fps = $("#fps").val();
+			settings.quality = $("#quality").val();
+			settings.url = $("#url").val();
+			settings.key = $("#key").val();
+
+			$.ajax("/settings", {
+				dataType: 'json',
+				contentType: 'application/json; charset=UTF-8',
+				data: settings,
+				type: "PUT"
+			});
+
+			console.log('hey');
+		}
+	</script>
+</head>
+<body>
+<button onclick=start()>Start stream</button>
+<button onclick=stop()>Stop stream</button>
+
+<form>
+Bitrate: <input id="bitrate" type=number />
+FPS: <input id="fps" type=number />
+Quality: <input id="quality" type=text />
+Url: <input id="url" type=text />
+Key: <input id="key" type=text />
+</form>
+
+<button onclick=postSettings()>Change settings</button>
+
+</body>
