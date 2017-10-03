@@ -19,6 +19,7 @@
 			settings.fps = $("#fps").val();
 			settings.quality = $("#quality").val();
 			settings.url = $("#url").val();
+			settings.src = $("source").val();
 			settings.key = $("#key").val();
 
 			$.ajax("/settings", {
@@ -37,10 +38,11 @@
 <button onclick=stop()>Stop stream</button>
 
 <form>
-Bitrate: <input id="bitrate" type=number />
-FPS: <input id="fps" type=number />
+Bitrate: <input id="bitrate" type=text />
+FPS: <input id="fps" type=text />
 Quality: <input id="quality" type=text />
 Url: <input id="url" type=text />
+Source: <input id="source" type="text" />
 Key: <input id="key" type=text />
 </form>
 
