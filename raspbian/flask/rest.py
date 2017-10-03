@@ -3,7 +3,7 @@ from flask import Flask, jsonify, request
 import subprocess
 import signal
 
-app = Flask(__name__, static_url_path='/home/thomas/Documents/flask/static')
+app = Flask(__name__, static_url_path='/home/thomas/Documents/nes-streamer/flask/static')
 
 #settings
 vbr = "2500k"

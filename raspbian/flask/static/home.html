@@ -31,6 +31,10 @@
 
 			console.log('hey');
 		}
+
+		function refreshVideo() {
+			$("#iframe")[0].src = $("#iframe")[0].src;
+		}
 	</script>
 </head>
 <body>
@@ -47,5 +51,12 @@ Key: <input id="key" type=text />
 </form>
 
 <button onclick=postSettings()>Change settings</button>
+
+<br>
+
+<iframe width="560" height="315" id="iframe" 
+	src="https://www.youtube.com/embed/live_stream?channel=UCbEtoWLREm7APFj8VYEr6Xw&autoplay=1"
+	frameborder="0" allowfullscreen></iframe>
+<button onclick=refreshVideo()>Refresh Stream</button>
 
 </body>
