@@ -10,7 +10,8 @@ vbr = "2500k"
 fps = "30"
 qual = "medium"
 youtube_url = "rtmp://a.rtmp.youtube.com/live2"
-source = "\"/home/thomas/Shared Disk/Shared Disk/Downloads/_Torrents/Rick and Morty Season 1 [1080p] [HEVC]/[pseudo] Rick and Morty S01E01 - Pilot [1080p] [h.265].mkv\""
+# THOMAS DEFIANTLY DOESTNS PRIRATE source = "\"/home/thomas/Shared Disk/Shared Disk/Downloads/_Torrents/Rick and Morty Season 1 [1080p] [HEVC]/[pseudo] Rick and Morty S01E01 - Pilot [1080p] [h.265].mkv\""
+source = "/home/pi/nes-streamer/raspbian/big_buck_bunny_720p_stereo.ogg"
 key = "4u3d-d39c-cp1c-bruj" 
 
 process = None
@@ -53,4 +54,4 @@ def stop_stream():
 
 
 if __name__ == '__main__':
-	app.run(debug=True)
+	app.run(debug=True,  host='0.0.0.0')
