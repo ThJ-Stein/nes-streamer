@@ -1,62 +1,70 @@
-	<!DOCTYPE html>
+        <!DOCTYPE html>
 <head>
-	<title>Settings</title>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-	<script>
+        <title>NES streamer</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script>
 
-		function start() {
-			$.post("/start");
-		}
+                function start() {
+                        startIframe();
+                        settings = {};
+                        settings.chanelID = $("#chanelID").val();
+                        settings.key = $("#key").val();
+                        settings.bitrate = $("#bitrate").val();
+                        settings.fps = $("#fps").val();
+                        settings.quality = $("#quality").val();
+                        settings.url = $("#url").val();
+                        settings.src = $("source").val();
 
-		function stop() {
-			$.post("/stop");
-		}
+                        console.log(settings);
 
-		function postSettings() {
+                        $.ajax("/start", {
+                                dataType: 'json',
+                                contentType: 'application/json; charset=UTF-8',
+                                data: JSON.stringify(settings),
+                                type: "POST"
+                        });
 
-			settings = {};
-			settings.bitrate = $("#bitrate").val();
-			settings.fps = $("#fps").val();
-			settings.quality = $("#quality").val();
-			settings.url = $("#url").val();
-			settings.src = $("source").val();
-			settings.key = $("#key").val();
+                        console.log('started');
+                }
 
-			$.ajax("/settings", {
-				dataType: 'json',
-				contentType: 'application/json; charset=UTF-8',
-				data: settings,
-				type: "PUT"
-			});
+                function stop() {
+                        $.post("/stop");
+                        console.log('stopped');
+                }
 
-			console.log('hey');
-		}
+                function refreshVideo() {
+                        $("#iframe")[0].src = $("#iframe")[0].src;
+                        console.log('refreshed');
+                }
 
-		function refreshVideo() {
-			$("#iframe")[0].src = $("#iframe")[0].src;
-		}
-	</script>
+                function startIframe(){
+                        $("#iframe").attr("src", "https://www.youtube.com/embed/live_stream?channel=" +$("#chanelID").val() + "&autoplay=1");
+                }
+        </script>
 </head>
 <body>
-<button onclick=start()>Start stream</button>
-<button onclick=stop()>Stop stream</button>
 
-<form>
-Bitrate: <input id="bitrate" type=text />
-FPS: <input id="fps" type=text />
-Quality: <input id="quality" type=text />
-Url: <input id="url" type=text />
-Source: <input id="source" type="text" />
-Key: <input id="key" type=text />
-</form>
+Channel ID: <input id="chanelID" type=text value="UCbEtoWLREm7APFj8VYEr6Xw"/><br>
+Streaming Key: <input id="key" type=text value="4u3d-d39c-cp1c-bruj"/><br>
 
-<button onclick=postSettings()>Change settings</button>
+<div id="settings">
+Bitrate: <input id="bitrate" type=text value="2500k"/><br>
+FPS: <input id="fps" type=text value="30"/><br>
+Quality: <input id="quality" type=text value="medium"/><br>
+Url: <input id="url" type=text value="rtmp://a.rtmp.youtube.com/live2"/><br>
+</div>
+
+<button onclick="start()">Start stream</button>
+<button onclick="stop()">Stop stream</button>
 
 <br>
 
 <iframe width="560" height="315" id="iframe" 
-	src="https://www.youtube.com/embed/live_stream?channel=UCbEtoWLREm7APFj8VYEr6Xw&autoplay=1"
-	frameborder="0" allowfullscreen></iframe>
-<button onclick=refreshVideo()>Refresh Stream</button>
+        src = "https://www.youtube.com/embed/live_stream?channel=&autoplay=1"
+        frameborder="0" allowfullscreen></iframe>
+
+<br>
+
+<button onclick="refreshVideo()">Refresh Stream</button>
 
 </body>
