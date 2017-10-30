@@ -55,8 +55,6 @@ void intHandler(int dummy) {
 int main(int argc, char **argv) {
 	active = true;
 
-
-
 	int oldReady = 0;
 	int oldProcessed = 0;
 
@@ -79,7 +77,6 @@ int main(int argc, char **argv) {
 		pinMode(i, INPUT);
 	}
 
-
 	digitalWrite(DATA_PROCESSED, oldProcessed);
 
 	while (active) {
@@ -91,14 +88,17 @@ int main(int argc, char **argv) {
 			loopCount++;
 			copyPins(oldPins, newPins);
 
+			busyWait(10);
+
 			readPins(newPins);
-//			printPins(newPins);
+			printPins(newPins);
 
-			oldProcessed = oldProcessed + 1 % 2;
+			oldProcessed = (oldProcessed + 1) % 2;
+
+//			printAllPins();
+
 			digitalWrite(DATA_PROCESSED, oldProcessed);
-
-			busyWait(100);
-
+			busyWait(7);
 		} else {
 			notReadyCount++;
 		}
@@ -106,7 +106,7 @@ int main(int argc, char **argv) {
 
 	digitalWrite(DATA_PROCESSED, 0);
 
-	printf("%d %d %d\n", loopCount, sameDataCount, notReadyCount);
+	printf("\n%d %d %d\n", loopCount, sameDataCount, notReadyCount);
 }
 
 void readPins(int *pins) {
