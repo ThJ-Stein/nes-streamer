@@ -18,9 +18,14 @@
 #include <sys/mman.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <signal.h>
  
 #define PAGE_SIZE (4*1024)
 #define BLOCK_SIZE (4*1024)
+
+unsigned int loopCount;
+unsigned int sameDataCount;
+unsigned int notReadyCount;
  
 int  mem_fd;
 void *gpio_map;
@@ -41,18 +46,25 @@ volatile unsigned *gpio;
  
 #define GPIO_PULL *(gpio+37) // Pull up/pull down
 #define GPIO_PULLCLK0 *(gpio+38) // Pull up/pull down clock
-#define GPIO_DATA_BYTE (*(gpio+13)&(0b11111111)) // bitmask to get the value of pin 0 to 7.
-#define GPIO_DATA_READY (*(gpio+13)&(1<<8)) // bitmask to get the data ready value at pin 8. 
-#define GPIO_FRAME_READY (*(gpio+13)&(1<<9)) // bitmask to get the frame ready value at pin 9.
+#define GPIO_DATA_BYTE (*(gpio+13)&(0b1111111100))>>2 // bitmask to get the value of pin 2 to 9.
+#define GPIO_DATA_READY (*(gpio+13)&(1<<10)) // bitmask to get the data ready value at pin 10. 
+#define GPIO_FRAME_READY (*(gpio+13)&(1<<11)) // bitmask to get the frame ready value at pin 11.
 
-#define GPIO_DATA_PROCESSED 10
-#define GPIO_DATA_PROCESSED_MASK 1<<10
+#define GPIO_DATA_PROCESSED 12
+#define GPIO_DATA_PROCESSED_MASK 1<<12
 void setup_io(); 
 
 bool active;
 
+void busyWait(int loops) {
+        while (loops > 0) {
+                loops--;
+        }
+}
+
 void intHandler(int dummy) {
-	active = false;
+  active = false;
+  printf("lc: %d, nrc: %d, sdc: %d \n",  loopCount, notReadyCount, sameDataCount);
 }
 
 int main(int argc, char **argv)
@@ -61,7 +73,7 @@ int main(int argc, char **argv)
  
   // Set up gpi pointer for direct register access
   setup_io();
- 
+  signal(SIGINT, intHandler);
   // Switch GPIO (BCM) 0..9 to input mode
 
  /************************************************************************\
@@ -72,35 +84,45 @@ int main(int argc, char **argv)
  \************************************************************************/
  
   // Set GPIO pins 0-10 to input
-  for (g=0; g<=10; g++)
+  for (g=2; g<=12; g++)
   {
     INP_GPIO(g);
   }
   // Set GPIO pin 10 to output
-  OUT_GPIO(10);
-
-  unsigned int loopCount = 0;
-  unsigned int sameDataCount = 0;
-  unsigned int notReadyCount = 0;
-  unsigned int ready = 1;
-  active = true;
+  OUT_GPIO(12);
+  loopCount = 0;
+  sameDataCount = 0;
+  notReadyCount = 0;
+  unsigned int ready = 0;
   char byte;
+  active = true;
+  GPIO_CLR = GPIO_DATA_PROCESSED_MASK;
+
   while (active) {
     if (GPIO_DATA_READY != ready) {
-      loopCount++;
-      if (byte == GPIO_DATA_BYTE) { // branch is relatively slow
-        sameDataCount++;
-      }
-      byte = GPIO_DATA_BYTE;
+//       printf("1: %d, %d \n", ready, GPIO_DATA_READY); // debug statement to see if data ready altnernates between 0 and 256.
 
-      printf("%X\n", byte); // disable this to test speed, a char is a byte, this prints the char corresponding to GPIO_DATA_BYTE
-      // printf("%d, %d \n", ready, GPIO_DATA_READY); // debug statement to see if data ready altnernates between 0 and 256.
-      if(GET_GPIO(GPIO_DATA_PROCESSED)) { // branch is relatively slow, there is a way to eliminate this one I think
-        GPIO_CLR = GPIO_DATA_PROCESSED_MASK; // sets data processed to 0
-      } else {
-        GPIO_SET = GPIO_DATA_PROCESSED_MASK;; // sets data processed to 1
-      }
+     loopCount++;
+//      if (byte == GPIO_DATA_BYTE) { // branch is relatively slow
+//        sameDataCount++;
+      byte = GPIO_DATA_BYTE;
       ready = GPIO_DATA_READY;
+
+//       printf("2: %d, %d \n", ready, GPIO_DATA_READY); // debug statement to see if data ready altnernates between 0 and 256.
+
+
+//      printf("%X\n", byte); // disable this to test speed, a char is a byte, this prints the char corresponding to GPIO_DATA_BYTE
+
+      if(GET_GPIO(GPIO_DATA_PROCESSED)) { // branch is relatively slow, there is a way to eliminate this one I think
+//        printf("setting processed to 0\n");
+	GPIO_CLR = GPIO_DATA_PROCESSED_MASK; // sets data processed to 0
+      } else {
+//      printf("setting processed to 1\n");
+        GPIO_SET = GPIO_DATA_PROCESSED_MASK; // sets data processed to 1
+      }
+//	printf("%d\n", GET_GPIO(GPIO_DATA_PROCESSED));
+      busyWait(10);
+
     } else {
       notReadyCount++;
     }
@@ -144,8 +166,3 @@ void setup_io()
  
 } // setup_io
 
-void busyWait(int loops) {
-	while (loops > 0) {
-		loops--;
-	}
-}
