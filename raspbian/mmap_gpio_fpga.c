@@ -118,10 +118,6 @@ int main(int argc, char **argv)
 	//printf("%d %d %d %d\n", gpio + 7, gpio + 10);
   int fd;
   int ret;
-  mkfifo("myfifo", 0666);
-  printf("fifo made\n");
-  fd = open("myfifo", O_WRONLY);
-  printf("fifo opened\n");
 
   char y = 0;
   char cr = 0;
@@ -142,13 +138,13 @@ int main(int argc, char **argv)
 	frame[frameIndex] = GPIO_DATA_BYTE;
 	frameIndex = (frameIndex + 1) % FRAME_SIZE;
 	if (!frameIndex) {
-		write(fd, frame, FRAME_SIZE);
+		write(1, frame, FRAME_SIZE);
 	}
 
 	processed = processed ^ processedMask;
 	*(gpio + processed) = GPIO_DATA_PROCESSED_MASK;
     } else {
-      notReadyCount++;
+//      notReadyCount++;
     }
   }
 
